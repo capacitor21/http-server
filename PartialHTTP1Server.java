@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 public class PartialHTTP1Server {
 
@@ -12,6 +13,7 @@ public class PartialHTTP1Server {
 
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]); //Takes port number from input
+        numThreads = 0;
         try {
             serv = new ServerSocket(port); 
         } catch(IOException e) {
@@ -24,6 +26,7 @@ public class PartialHTTP1Server {
                 Socket t = serv.accept();
             
                 SocketHandler handler = new SocketHandler(t);
+                numThreads++;
                 handler.start();
 
             } catch(IOException e) {
