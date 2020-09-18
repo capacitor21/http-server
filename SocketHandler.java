@@ -26,6 +26,10 @@ public class SocketHandler extends Thread {
      }
 
      public void parseRequest(String request) {
+        String[] firstLine = request.split(" ");
+        for(String s: firstLine) {
+            System.out.println(s);
+        }
         return;
      }
 }
