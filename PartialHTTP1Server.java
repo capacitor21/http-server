@@ -23,8 +23,8 @@ public class PartialHTTP1Server {
 
         while(true) {
             try {
-                SocketHandler handler = new SocketHandler(serv.accept());
-                threads.add(handler);
+                Socket s = serv.accept();
+                SocketHandler handler = new SocketHandler(s);
                 handler.start();
 
             } catch(IOException e) {
