@@ -5,8 +5,8 @@ import java.net.*;
 public class SocketHandler extends Thread {
 
     private Socket s; //Socket passed to the current thread
-    private BufferedReader req; //Used to read incoming HTTP request
-    private DataOutputStream resp; //Output stream for response
+    private static BufferedReader req; //Used to read incoming HTTP request
+    private static BufferedWriter resp; //Output stream for response
 
     public SocketHandler(Socket s) {
         this.s = s;
@@ -14,68 +14,149 @@ public class SocketHandler extends Thread {
     public void run() {
         try {
             req = new BufferedReader(new InputStreamReader(s.getInputStream())); //Setup up reader to read in request
-            resp = new DataOutputStream(s.getOutputStream()); //Setup output stream of socket for responses
+            resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream())); //Setup output stream of socket for responses
 
             String first = req.readLine();
             parseRequest(first);
 
-            resp.writeBytes("Got request. Heres my response");
-            resp.flush();
         } catch(IOException e) {
             e.printStackTrace();
         }
      }
 
+
+     //This method parses incoming request and responds with the appropriate error message
+     //If passed without errors gets handed to the appropriate method
      public void parseRequest(String request) {
         String[] firstLine = request.split(" ");
 
         String command = firstLine[0];
         if(command.equals("GET")) {
             //Call GET method
-            System.out.println("Recieved GET");
         } else if(command.equals("POST")) {
             //Do something to handle POST
         } else if(command.equals("HEAD")) {
             //Do something to handle HEAD
         } else if(command.equals("DELETE") || command.equals("PUT") || command.equals("LINK") || command.equals("UNLINK")) {
-            //RESPOND WITH 501 Not Implemented
+            write(Response.getErrorMessage(501)); //Return 501 not implemented
         } else {
-            //Send back 400 BAD REQUEST
+            write(Response.getErrorMessage(400)); //Command doesn't exist return bad request
         }
 
-        //Handle the source
+
         String source = firstLine[1];
-        //MAKE SURE SOURCE IS FORMATTED properly
+        //Check whether source path is valid
+        File sourceFile = new File(source);
+        try {
+            sourceFile.getAbsolutePath();
+        } catch (Exception e) {
+            write(Response.getErrorMessage(400));
+        }
+        //Check whether file exists or not
+        //if(!sourceFile.exists()) {
+        //    write(Response.getErrorMessage(404));
+        //}
+        
 
-        //Some regex expression to match proper source format
-
-        if (firstLine.length != 3) {
-            //400 Bad Request HTTP version is required
+        
+        if (firstLine.length < 3) {
+            write(Response.getErrorMessage(400)); //HTTP version number missing 400 Bad request
+            return;
         } 
 
         String version = firstLine[2];
         if(version.matches("HTTP/0.\\d") || version.matches("HTTP/1.0")) {
             //Do nothing version is good
         } else if(version.matches("HTTP/\\d.\\d")) {
-            //Send 505 HTTP Version Not Supported
+            write(Response.getErrorMessage(505)); //Send 505 HTTP Version Not Supported
         } else {
-            //Version malformed send 400 Bad Request
+            write(Response.getErrorMessage(400)); //Invalid HTTP Version 400 Bad Request
         }
 
-        
 
+        //Hand off the file to the appropriate method
+        switch (command) {
+            case "HEAD":
+                //head(sourceFile);
+                break;
+            case "GET":
+                //get(sourceFile);
+                break;
+            case "POST":
+                //post(sourceFile);
+                break;
+        }
 
         return;
+     }
+
+     public void get(File sourceFile) {
+
+     }
+
+     public void post(File sourceFile) {
+
+     }
+
+     public void head(File sourceFile) {
+
+     }
+
+
+     //Takes in a response string and writes it out to the buffer
+     public static void write(String response) {
+        try {
+            resp.write(response);
+            resp.flush();
+            resp.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
      }
 }
 
 
-//Response class not yet implemented
+//Response class to properly structure HTTP response messages
 class Response {
     public int statusCode; //Code response
+    public String errorMessage;
+    public Response() {
 
-    public Response(int statusCode) {
-        this.statusCode = statusCode;
+    }
+
+    //Takes error code as input and returns correspoding error message
+    public static String getErrorMessage(int statusCode) {
+        String output = "";
+        switch (statusCode) {
+            case 304: 
+                output = "HTTP/1.0 " + statusCode + " Not Modified";
+                break;
+            case 400:
+                output = "HTTP/1.0 " + statusCode + " Bad Request";
+                break;
+            case 403:
+                output = "HTTP/1.0 " + statusCode + " Forbidden";
+                break;
+            case 404:
+                output = "HTTP/1.0 " + statusCode + " Not Found";
+                break;
+            case 408:
+                output = "HTTP/1.0 " + statusCode + " Request Timeout";
+                break;
+            case 500:   
+                output = "HTTP/1.0 " + statusCode + " Internal Service Error";
+                break;
+            case 501:
+                output = "HTTP/1.0 " + statusCode + " Not Implemented";
+                break;
+            case 503:
+                output = "HTTP/1.0 " + statusCode + " Service Unavailable";
+                break;
+            case 505:
+                output = "HTTP/1.0 " + statusCode + " HTTP Version Not Supported";
+                break;
+        }
+        return output;
     }
 
 }
