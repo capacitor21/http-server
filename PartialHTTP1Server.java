@@ -18,7 +18,6 @@ public class PartialHTTP1Server {
             e.printStackTrace();
             //Do something
         }
-        ExecutorService tpool = Executors.newFixedThreadPool(5); //thread pool object
         while(true) {
             try {
                 Socket s = serv.accept();
@@ -36,13 +35,13 @@ public class PartialHTTP1Server {
                 else{
                     SocketHandler handler = new SocketHandler(s);
                     threads.add(handler);
-                    tpool.execute(handler);
+                    handler.start();
                     threads.remove(threads.indexOf(handler));
                 }
             } catch(IOException e) {
                 e.printStackTrace();
             }
         }
-        tpool.shutdown();
+        
     }
 }
