@@ -8,23 +8,23 @@ public class PartialHTTP1Server {
     public static int port; 
     public static int numThreads; //How many threads are currently created
 
-    public static ArrayList<Thread> threads; //Possible data stucture to store current threads???
+    public static ArrayList<SocketHandler> threads; //Possible data stucture to store current threads???
     
-
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]); //Takes port number from input
         numThreads = 0;
+        threads = new ArrayList<SocketHandler>();
         try {
             serv = new ServerSocket(port); 
         } catch(IOException e) {
             e.printStackTrace();
             //Do something
         }
-
+      
         while(true) {
             try {
                 Socket s = serv.accept();
-                if(numThreads>50){
+                if(threads.size()>50){
                 
                     try{
                         BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
@@ -36,16 +36,14 @@ public class PartialHTTP1Server {
                     }
                 }
                 else{
-                    numThreads++;
                     SocketHandler handler = new SocketHandler(s);
+                    threads.add(handler);
                     handler.start();
-                    numThreads--;
+                    threads.remove(threads.indexOf(handler));
                 }
             } catch(IOException e) {
                 e.printStackTrace();
             }
         }
-        
-
     }
 }
