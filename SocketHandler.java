@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 
 public class SocketHandler implements Runnable {
 
@@ -30,13 +31,13 @@ public class SocketHandler implements Runnable {
      public void parseRequest(String request) {
         String[] firstLine = request.split(" ");
 
+        if(firstLine.length == 0) {
+            write(Response.getErrorMessage(400)); //Bad request NULL request
+        }
+
         String command = firstLine[0];
-        if(command.equals("GET")) {
-            //Call GET method
-        } else if(command.equals("POST")) {
-            //Do something to handle POST
-        } else if(command.equals("HEAD")) {
-            //Do something to handle HEAD
+        if(command.equals("GET") || command.equals("POST") || command.equals("HEAD")) {
+            //Do nothing and continue
         } else if(command.equals("DELETE") || command.equals("PUT") || command.equals("LINK") || command.equals("UNLINK")) {
             write(Response.getErrorMessage(501)); //Return 501 not implemented
         } else {
@@ -52,17 +53,13 @@ public class SocketHandler implements Runnable {
         } catch (Exception e) {
             write(Response.getErrorMessage(400));
         }
-        //Check whether file exists or not
-        //if(!sourceFile.exists()) {
-        //    write(Response.getErrorMessage(404));
-        //}
-        
 
-        
+
         if (firstLine.length < 3) {
             write(Response.getErrorMessage(400)); //HTTP version number missing 400 Bad request
             return;
         } 
+
 
         String version = firstLine[2];
         if(version.matches("HTTP/0.\\d") || version.matches("HTTP/1.0")) {
@@ -77,13 +74,13 @@ public class SocketHandler implements Runnable {
         //Hand off the file to the appropriate method
         switch (command) {
             case "HEAD":
-                //head(sourceFile);
+                head(sourceFile);
                 break;
             case "GET":
-                //get(sourceFile);
+                get(sourceFile);
                 break;
             case "POST":
-                //post(sourceFile);
+                post(sourceFile);
                 break;
         }
 
@@ -91,15 +88,27 @@ public class SocketHandler implements Runnable {
      }
 
      public void get(File sourceFile) {
-
+        if(!sourceFile.exists()) {
+            write(Response.getErrorMessage(404));
+        }
      }
 
      public void post(File sourceFile) {
-
+        if(!sourceFile.exists()) {
+            write(Response.getErrorMessage(404));
+        }
      }
 
      public void head(File sourceFile) {
+        
+        if(!sourceFile.exists()) {
+            write(Response.getErrorMessage(404));
+        }
 
+        Response r = new Response(sourceFile);
+
+        write(r.getResponseHeaders(100));
+        
      }
 
 
@@ -118,10 +127,63 @@ public class SocketHandler implements Runnable {
 
 //Response class to properly structure HTTP response messages
 class Response {
-    public int statusCode; //Code response
-    public String errorMessage;
-    public Response() {
 
+    File source;    
+
+    public Response(File source) {
+        this.source = source;
+    }
+
+    public String getResponseHeaders(int length) {
+        StringBuilder s = new StringBuilder();
+        s.append("HTTP/1.0 200 OK\n");
+        s.append("Content-Type: " + getMimeType(source.getAbsolutePath()) + "\n");
+        s.append("Content-Length: " + length + "\n");
+        s.append("Last-Modified: " + convertDateFormat(source.lastModified()) + "\n");
+        s.append("Content-Encoding: " + "identity\n");
+        s.append("Allow: GET, POST, HEAD\n");
+        s.append("Expires: a future date\n\n");
+        
+        return s.toString();
+    }
+
+
+    //Finds file extension from source and returns with corresponding mime type
+    public static String getMimeType(String source) {
+        int last = source.lastIndexOf(".") + 1; //gets the index where extension starts
+        String extension = source.substring(last);
+        
+        String mime = "";
+        switch (extension) {
+            case "txt":
+                mime = "text/plain";
+                break;
+            case "html":
+                mime = "text/html";
+                break;
+            case "gif":
+                mime = "image/gif";
+                break;
+            case "jpeg":
+                mime = "image/jpeg";
+                break;
+            case "png":
+                mime = "image/png";
+                break;
+            case "pdf":
+                mime = "application/pdf";
+                break;
+            case "x-gzip":
+                mime = "application/x-gzip";
+                break;
+            case "zip":
+                mime = "application/zip";
+                break;
+            default:
+                mime = "applcation/octet-stream";
+        }
+
+        return mime;
     }
 
     //Takes error code as input and returns correspoding error message
@@ -158,5 +220,15 @@ class Response {
         }
         return output;
     }
+
+
+    //Takes time in long and converts it to http date format
+    public static String convertDateFormat(long time) {
+        Date date = new Date(time);
+        SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        formatter.format(date);
+
+        return formatter.toString();
+    } 
 
 }
