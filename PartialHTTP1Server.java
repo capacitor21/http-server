@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService; 
+import java.util.concurrent.Executors; 
 
 public class PartialHTTP1Server {
 
@@ -18,6 +20,7 @@ public class PartialHTTP1Server {
             e.printStackTrace();
             //Do something
         }
+        ExecutorService tpool = Executors.newFixedThreadPool(5); //thread pool object
         while(true) {
             try {
                 Socket s = serv.accept();
@@ -35,13 +38,12 @@ public class PartialHTTP1Server {
                 else{
                     SocketHandler handler = new SocketHandler(s);
                     threads.add(handler);
-                    handler.start();
+                    tpool.execute(handler);
                     threads.remove(threads.indexOf(handler));
                 }
             } catch(IOException e) {
                 e.printStackTrace();
             }
         }
-        
     }
 }
