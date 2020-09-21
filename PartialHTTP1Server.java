@@ -5,8 +5,9 @@ import java.util.*;
 public class PartialHTTP1Server {
 
     public static ServerSocket serv; //ServerSocket that listens for connections
-    public static int port;
-    
+    public static int port; 
+    public static int numThreads; //How many threads are currently created
+
     public static ArrayList<Thread> threads; //Possible data stucture to store current threads???
     
 
@@ -22,23 +23,9 @@ public class PartialHTTP1Server {
 
         while(true) {
             try {
-                
                 Socket s = serv.accept();
-                
-                DataInputStream dis = new DataInputStream(s.getInputSteam());
-                DataOutputStream dos = new DataOutputStream(s.getOutPutStream());
-                
-                if(threads.size()<50)
-                    //503 serivce not available
-                    
-                else{
-                Thread t = new ClientHandler(s,dis,dos);
-                threads.add(t);
-                t.start();
-                
                 SocketHandler handler = new SocketHandler(s);
                 handler.start();
-                }
 
             } catch(IOException e) {
                 e.printStackTrace();
