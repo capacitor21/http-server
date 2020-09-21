@@ -5,22 +5,20 @@ import java.util.*;
 public class PartialHTTP1Server {
 
     public static ServerSocket serv; //ServerSocket that listens for connections
-    public static int port; 
-    public static int numThreads; //How many threads are currently created
+    public static int port;
 
-    public static ArrayList<Thread> threads; //Possible data stucture to store current threads???
+    public static ArrayList<SocketHandler> threads; //Possible data stucture to store current threads???
     
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]); //Takes port number from input
-        numThreads = 0;
-        threads = new ArrayList<Thread>();
+        threads = new ArrayList<SocketHandler>();
         try {
             serv = new ServerSocket(port); 
         } catch(IOException e) {
             e.printStackTrace();
             //Do something
         }
-      
+        ExecutorService tpool = Executors.newFixedThreadPool(5); //thread pool object
         while(true) {
             try {
                 Socket s = serv.accept();
@@ -36,14 +34,15 @@ public class PartialHTTP1Server {
                     }
                 }
                 else{
-                    Thread handler = new Thread(new SocketHandler(s));
+                    SocketHandler handler = new SocketHandler(s);
                     threads.add(handler);
-                    handler.start();
+                    tpool.execute(handler);
                     threads.remove(threads.indexOf(handler));
                 }
             } catch(IOException e) {
                 e.printStackTrace();
             }
         }
+        tpool.shutdown();
     }
 }
