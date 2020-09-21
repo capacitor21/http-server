@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
-public class SocketHandler extends Thread {
+public class SocketHandler implements Runnable {
 
     private Socket s; //Socket passed to the current thread
     private static BufferedReader req; //Used to read incoming HTTP request

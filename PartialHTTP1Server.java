@@ -8,12 +8,12 @@ public class PartialHTTP1Server {
     public static int port; 
     public static int numThreads; //How many threads are currently created
 
-    public static ArrayList<SocketHandler> threads; //Possible data stucture to store current threads???
+    public static ArrayList<Thread> threads; //Possible data stucture to store current threads???
     
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]); //Takes port number from input
         numThreads = 0;
-        threads = new ArrayList<SocketHandler>();
+        threads = new ArrayList<Thread>();
         try {
             serv = new ServerSocket(port); 
         } catch(IOException e) {
@@ -36,7 +36,7 @@ public class PartialHTTP1Server {
                     }
                 }
                 else{
-                    SocketHandler handler = new SocketHandler(s);
+                    Thread handler = new Thread(new SocketHandler(s));
                     threads.add(handler);
                     handler.start();
                     threads.remove(threads.indexOf(handler));
