@@ -24,9 +24,23 @@ public class PartialHTTP1Server {
         while(true) {
             try {
                 Socket s = serv.accept();
-                SocketHandler handler = new SocketHandler(s);
-                handler.start();
-
+                if(numThreads>50){
+                
+                    try{
+                        BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+                        resp.write(Response.getErrorMessage(503));
+                        resp.flush();
+                        resp.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else{
+                    numThreads++;
+                    SocketHandler handler = new SocketHandler(s);
+                    handler.start();
+                    numThreads--;
+                }
             } catch(IOException e) {
                 e.printStackTrace();
             }
