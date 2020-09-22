@@ -1,123 +1,162 @@
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 
 public class SocketHandler implements Runnable {
 
-    private Socket s; //Socket passed to the current thread
-    private static BufferedReader req; //Used to read incoming HTTP request
-    private static BufferedWriter resp; //Output stream for response
+    private Socket s; // Socket passed to the current thread
+    private static BufferedReader req; // Used to read incoming HTTP request
+    private static BufferedWriter resp; // Output stream for response
 
     public SocketHandler(Socket s) {
         this.s = s;
     }
+
     public void run() {
         try {
-            req = new BufferedReader(new InputStreamReader(s.getInputStream())); //Setup up reader to read in request
-            resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream())); //Setup output stream of socket for responses
+            req = new BufferedReader(new InputStreamReader(s.getInputStream())); // Setup up reader to read in request
+            resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream())); // Setup output stream of socket for                                                                                   // responses
 
             String first = req.readLine();
+            System.out.println("Working directory: " + System.getProperty("user.dir"));
             parseRequest(first);
 
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-     }
+    }
 
-
-     //This method parses incoming request and responds with the appropriate error message
-     //If passed without errors gets handed to the appropriate method
-     public void parseRequest(String request) {
+    // This method parses incoming request and responds with the appropriate error
+    // message
+    // If passed without errors gets handed to the appropriate method
+    public void parseRequest(String request) {
         String[] firstLine = request.split(" ");
 
-        if(firstLine.length == 0) {
-            write(Response.getErrorMessage(400)); //Bad request NULL request
+        if (firstLine.length == 0) {
+            write(Response.getErrorMessage(400)); // Bad request NULL request
+            return;
         }
 
         String command = firstLine[0];
-        if(command.equals("GET") || command.equals("POST") || command.equals("HEAD")) {
-            //Do nothing and continue
-        } else if(command.equals("DELETE") || command.equals("PUT") || command.equals("LINK") || command.equals("UNLINK")) {
-            write(Response.getErrorMessage(501)); //Return 501 not implemented
+        if (command.equals("GET") || command.equals("POST") || command.equals("HEAD")) {
+            // Do nothing and continue
+        } else if (command.equals("DELETE") || command.equals("PUT") || command.equals("LINK") || command.equals("UNLINK")) {
+            write(Response.getErrorMessage(501)); // Return 501 not implemented
+            return;
         } else {
-            write(Response.getErrorMessage(400)); //Command doesn't exist return bad request
+            write(Response.getErrorMessage(400)); // Command doesn't exist return bad request
+            return;
         }
-
 
         String source = firstLine[1];
-        //Check whether source path is valid
+        if (source.charAt(0) == '/') {
+            source = source.substring(1);
+        }
+
+        // Check whether source path is valid
         File sourceFile = new File(source);
         try {
-            sourceFile.getAbsolutePath();
+            sourceFile.getCanonicalPath();
         } catch (Exception e) {
             write(Response.getErrorMessage(400));
+            return;
         }
-
 
         if (firstLine.length < 3) {
-            write(Response.getErrorMessage(400)); //HTTP version number missing 400 Bad request
+            write(Response.getErrorMessage(400)); // HTTP version number missing 400 Bad request
             return;
-        } 
-
-
-        String version = firstLine[2];
-        if(version.matches("HTTP/0.\\d") || version.matches("HTTP/1.0")) {
-            //Do nothing version is good
-        } else if(version.matches("HTTP/\\d.\\d")) {
-            write(Response.getErrorMessage(505)); //Send 505 HTTP Version Not Supported
-        } else {
-            write(Response.getErrorMessage(400)); //Invalid HTTP Version 400 Bad Request
         }
 
+        String version = firstLine[2];
+        if (version.matches("HTTP/0.\\d") || version.matches("HTTP/1.0")) {
+            // Do nothing version is good
+        } else if (version.matches("HTTP/\\d.\\d")) {
+            write(Response.getErrorMessage(505)); // Send 505 HTTP Version Not Supported
+            return;
+        } else {
+            write(Response.getErrorMessage(400)); // Invalid HTTP Version 400 Bad Request
+            return;
+        }
 
-        //Hand off the file to the appropriate method
+        // Hand off the file to the appropriate method
         switch (command) {
             case "HEAD":
                 head(sourceFile);
                 break;
             case "GET":
-                get(sourceFile);
+                get(sourceFile); 
                 break;
             case "POST":
-                post(sourceFile);
+                //Calls get because same functionality for the purpose of the project
+                get(sourceFile);
                 break;
         }
 
         return;
-     }
+    }
 
-     public void get(File sourceFile) {
-        if(!sourceFile.exists()) {
+    public void get(File sourceFile) {
+        if (!sourceFile.exists()) {
             write(Response.getErrorMessage(404));
+            return;
         }
+
+        Response r = new Response(sourceFile);
+        
+        String headers;
+        byte[] fileBytes;
+        try {
+            fileBytes = Files.readAllBytes(sourceFile.toPath());
+            headers = r.getResponseHeaders(fileBytes.length);
+            write(headers + "\n\r" + fileBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
      }
 
+
+     //POST method not implemented because functions the same as get for this project
      public void post(File sourceFile) {
-        if(!sourceFile.exists()) {
-            write(Response.getErrorMessage(404));
-        }
+        //POST method not implemented because functions the same as get for this project
      }
 
+
+     //HEAD method returns just the headers of the file without the file bytes themselves
      public void head(File sourceFile) {
         
         if(!sourceFile.exists()) {
             write(Response.getErrorMessage(404));
+            return;
         }
 
         Response r = new Response(sourceFile);
 
-        write(r.getResponseHeaders(100));
+        String headers;
+        byte[] fileBytes;
+        try {
+            fileBytes = Files.readAllBytes(sourceFile.toPath());
+            headers = r.getResponseHeaders(fileBytes.length);
+            write(headers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return; 
         
      }
 
 
      //Takes in a response string and writes it out to the buffer
-     public static void write(String response) {
+     public void write(String response) {
         try {
             resp.write(response);
             resp.flush();
             resp.close();
+            req.close();
+            s.close();
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -142,7 +181,7 @@ class Response {
         s.append("Last-Modified: " + convertDateFormat(source.lastModified()) + "\n");
         s.append("Content-Encoding: " + "identity\n");
         s.append("Allow: GET, POST, HEAD\n");
-        s.append("Expires: a future date\n\n");
+        s.append("Expires: a future date");
         
         return s.toString();
     }
@@ -150,8 +189,7 @@ class Response {
 
     //Finds file extension from source and returns with corresponding mime type
     public static String getMimeType(String source) {
-        int last = source.lastIndexOf(".") + 1; //gets the index where extension starts
-        String extension = source.substring(last);
+        String extension = source.substring(source.lastIndexOf(".") + 1);
         
         String mime = "";
         switch (extension) {
@@ -226,9 +264,10 @@ class Response {
     public static String convertDateFormat(long time) {
         Date date = new Date(time);
         SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-        formatter.format(date);
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String httpDate = formatter.format(date);
 
-        return formatter.toString();
+        return httpDate;
     } 
 
 }

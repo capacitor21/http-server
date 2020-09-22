@@ -1,0 +1,269 @@
+Test Case 1
+
+# Request:
+GET /index.html
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 2
+
+# Request:
+KICK /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 3
+
+# Request:
+GET /i n d e x . h t m l HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 4
+
+# Request:
+get /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 5
+
+# Request:
+GET /index.html HTTP/1.1
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 6
+
+# Request:
+PUT /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 7
+
+# Request:
+DELETE /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 8
+
+# Request:
+LINK /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 9
+
+# Request:
+UNLINK /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 10
+
+# Request:
+GET /top_secret.txt HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 403 Forbidden"
+
+==============================
+
+Test Case 11
+
+# Request:
+GET /missing.zip HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Passed!
+
+==============================
+
+Test Case 12
+
+# Request:
+GET /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 200 OK"
+ - Response header not found: "Content-Type: text/html"
+ - Response header not found: "Content-Length: 3191"
+ - Response header not found: "Last-Modified: Wed, 15 Jul 2015 04:14:40 GMT"
+ - Response header not found: "Content-Encoding: identity"
+ - Response header not found: "Allow: GET, POST, HEAD"
+ - Response header not found: "Expires: a future date"
+ - Payload not found
+
+==============================
+
+Test Case 13
+
+# Request:
+HEAD /index.html HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 200 OK"
+ - Response header not found: "Content-Type: text/html"
+ - Response header not found: "Content-Length: 3191"
+ - Response header not found: "Last-Modified: Wed, 15 Jul 2015 04:14:40 GMT"
+ - Response header not found: "Content-Encoding: identity"
+ - Response header not found: "Allow: GET, POST, HEAD"
+ - Response header not found: "Expires: a future date"
+ - Payload not found
+
+==============================
+
+Test Case 14
+
+# Request:
+GET /resources/google.png HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 200 OK"
+ - Response header not found: "Content-Type: image/png"
+ - Response header not found: "Content-Length: 14022"
+ - Response header not found: "Last-Modified: Wed, 09 Oct 2013 01:35:39 GMT"
+ - Response header not found: "Content-Encoding: identity"
+ - Response header not found: "Allow: GET, POST, HEAD"
+ - Response header not found: "Expires: a future date"
+ - Payload not found
+
+==============================
+
+Test Case 15
+
+# Request:
+POST /resources/google.png HTTP/1.0
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 200 OK"
+ - Response header not found: "Content-Type: image/png"
+ - Response header not found: "Content-Length: 14022"
+ - Response header not found: "Last-Modified: Wed, 09 Oct 2013 01:35:39 GMT"
+ - Response header not found: "Content-Encoding: identity"
+ - Response header not found: "Allow: GET, POST, HEAD"
+ - Response header not found: "Expires: a future date"
+ - Payload not found
+
+==============================
+
+Test Case 16
+
+# Request:
+GET /resources/bitcoin.pdf HTTP/1.0
+If-Modified-Since: Tue, 14 Jul 2015 18:00:00 GMT
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 304 Not Modified"
+ - Response header not found: "Expires: a future date"
+
+==============================
+
+Test Case 17
+
+# Request:
+GET /resources/ls HTTP/1.0
+If-Modified-Since: Tue, 14 Jul 2015 18:00:00 GMT
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 200 OK"
+ - Response header not found: "Content-Type: application/octet-stream"
+ - Response header not found: "Content-Length: 34640"
+ - Response header not found: "Last-Modified: Wed, 15 Jul 2015 04:53:48 GMT"
+ - Response header not found: "Content-Encoding: identity"
+ - Response header not found: "Allow: GET, POST, HEAD"
+ - Response header not found: "Expires: a future date"
+ - Payload not found
+
+==============================
+
+Test Case 18
+
+# Request:
+GET /resources/bitcoin.pdf HTTP/1.0
+If-Modified-Since: foobar 30000
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 200 OK"
+ - Response header not found: "Content-Type: application/pdf"
+ - Response header not found: "Content-Length: 184292"
+ - Response header not found: "Last-Modified: Tue, 14 Jul 2015 14:13:49 GMT"
+ - Response header not found: "Content-Encoding: identity"
+ - Response header not found: "Allow: GET, POST, HEAD"
+ - Response header not found: "Expires: a future date"
+ - Payload not found
+
+==============================
+
+Test Case 19
+
+# Request:
+HEAD /resources/bitcoin.pdf HTTP/1.0
+If-Modified-Since: Tue, 14 Jul 2015 18:00:00 GMT
+<Blank line>
+
+# Feedback:
+ - Response header not found: "HTTP/1.0 200 OK"
+ - Response header not found: "Content-Type: application/pdf"
+ - Response header not found: "Content-Length: 184292"
+ - Response header not found: "Last-Modified: Tue, 14 Jul 2015 14:13:49 GMT"
+ - Response header not found: "Content-Encoding: identity"
+ - Response header not found: "Allow: GET, POST, HEAD"
+ - Response header not found: "Expires: a future date"
+ - Payload not found
+
+==============================
+
+Test Case 20
+
+# Request:
+<Null request>
+
+# Feedback:
