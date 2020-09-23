@@ -9,7 +9,7 @@ public class SocketHandler implements Runnable {
 
     private Socket s; // Socket passed to the current thread
     private static BufferedReader req; // Used to read incoming HTTP request
-    private static BufferedWriter resp; // Output stream for response
+    private static BufferedOutputStream resp; // Output stream for response
     private String ifModified;
 
     public SocketHandler(Socket s) {
@@ -19,11 +19,11 @@ public class SocketHandler implements Runnable {
     public void run() {
         try {
             req = new BufferedReader(new InputStreamReader(s.getInputStream())); // Setup up reader to read in request
-            resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream())); // Setup output stream of socket for responses
+            resp = new BufferedOutputStream(s.getOutputStream()); // Setup output stream of socket for responses
 
             String first = req.readLine();
             ifModified = req.readLine();
-            System.out.println("If-Modified: " + ifModified);
+
             parseRequest(first);
 
         } catch (IOException e) {
@@ -46,8 +46,7 @@ public class SocketHandler implements Runnable {
         String command = firstLine[0];
         if (command.equals("GET") || command.equals("POST") || command.equals("HEAD")) {
             // Do nothing and continue
-        } else if (command.equals("DELETE") || command.equals("PUT") || command.equals("LINK")
-                || command.equals("UNLINK")) {
+        } else if (command.equals("DELETE") || command.equals("PUT") || command.equals("LINK") || command.equals("UNLINK")) {
             write(Response.getErrorMessage(501)); // Return 501 not implemented
             return;
         } else {
@@ -135,9 +134,12 @@ public class SocketHandler implements Runnable {
         byte[] fileBytes;
         try {
             fileBytes = Files.readAllBytes(sourceFile.toPath());
-            headers = r.getResponseHeaders(fileBytes.length);
-            System.out.println(headers + "\r\n" + fileBytes);
-            write(headers + "\r\n" + fileBytes);
+            headers = r.getResponseHeaders(fileBytes.length) + "\r\n";
+
+            resp.write(headers.getBytes());
+            resp.write(fileBytes);
+            resp.flush();
+            resp.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -189,7 +191,7 @@ public class SocketHandler implements Runnable {
      */
     public void write(String response) {
         try {
-            resp.write(response);
+            resp.write(response.getBytes());
             resp.flush();
             resp.close();
             req.close();
