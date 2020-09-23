@@ -11,6 +11,14 @@ public class PartialHTTP1Server {
 
     public static ArrayList<SocketHandler> threads; //Possible data stucture to store current threads???
     
+    private static checkThreads(){ //Checks to see which threads are still active in the threadlist
+        for(SocketHandler handler : threads)
+        {
+            if(!handler.isAlive()
+            threads.remove(threads.indexOf(handler));
+        }
+    }
+    
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]); //Takes port number from input
         threads = new ArrayList<SocketHandler>();
@@ -24,6 +32,7 @@ public class PartialHTTP1Server {
         while(true) {
             try {
                 Socket s = serv.accept();
+                checkThreads();
                 if(threads.size()>50){
                 
                     try{
@@ -39,7 +48,6 @@ public class PartialHTTP1Server {
                     SocketHandler handler = new SocketHandler(s);
                     threads.add(handler);
                     tpool.execute(handler);
-                    threads.remove(threads.indexOf(handler));
                 }
             } catch(IOException e) {
                 e.printStackTrace();
