@@ -2,7 +2,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService; 
-import java.util.concurrent.Executors; 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class PartialHTTP1Server {
 
@@ -10,14 +11,6 @@ public class PartialHTTP1Server {
     public static int port;
 
     public static ArrayList<SocketHandler> threads; //Possible data stucture to store current threads???
-    
-    private static checkThreads(){ //Checks to see which threads are still active in the threadlist
-        for(SocketHandler handler : threads)
-        {
-            if(!handler.isAlive()
-            threads.remove(threads.indexOf(handler));
-        }
-    }
     
     public static void main(String[] args) {
         port = Integer.parseInt(args[0]); //Takes port number from input
@@ -28,12 +21,11 @@ public class PartialHTTP1Server {
             e.printStackTrace();
             //Do something
         }
-        ExecutorService tpool = Executors.newFixedThreadPool(5); //thread pool object
+        ThreadPoolExecutor tpool = (ThreadPoolExecutor) Executors.newFixedThreadPool(5); //thread pool object
         while(true) {
             try {
                 Socket s = serv.accept();
-                checkThreads();
-                if(threads.size()>50){
+                if(tpool.getPoolSize()==50){
                 
                     try{
                         BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
