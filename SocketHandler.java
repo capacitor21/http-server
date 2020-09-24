@@ -8,8 +8,8 @@ import java.text.SimpleDateFormat;
 public class SocketHandler implements Runnable {
 
     private Socket s; // Socket passed to the current thread
-    private static BufferedReader req; // Used to read incoming HTTP request
-    private static BufferedOutputStream resp; // Output stream for response
+    private BufferedReader req; // Used to read incoming HTTP request
+    private BufferedOutputStream resp; // Output stream for response
     private String ifModified;
 
     public SocketHandler(Socket s) {
@@ -18,6 +18,7 @@ public class SocketHandler implements Runnable {
 
     public void run() {
         try {
+            s.setSoTimeout(5000); //Set timeout to 5 seconds
             req = new BufferedReader(new InputStreamReader(s.getInputStream())); // Setup up reader to read in request
             resp = new BufferedOutputStream(s.getOutputStream()); // Setup output stream of socket for responses
 
@@ -26,6 +27,8 @@ public class SocketHandler implements Runnable {
 
             parseRequest(first);
 
+        } catch (SocketTimeoutException e) {
+            write(Response.getErrorMessage(408)); //Catch timeout exception after 5 seconds and send 408 timeout error response
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,7 +59,7 @@ public class SocketHandler implements Runnable {
 
         String source = firstLine[1];
         if (source.charAt(0) == '/') {
-            source = source.substring(1);
+            source = "." + source;
         }
 
         // Check whether source path is valid
@@ -143,6 +146,8 @@ public class SocketHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return;
 
     }
 
