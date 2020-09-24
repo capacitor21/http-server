@@ -1,13 +1,8 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-//imports for thread pool:
-import java.util.concurrent.ExecutorService; 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
+//import for thread pool:
+import java.util.concurrent.*;
 
 
 public class PartialHTTP1Server {
