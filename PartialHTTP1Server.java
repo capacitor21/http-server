@@ -32,6 +32,7 @@ public class PartialHTTP1Server {
                         resp.write(Response.getErrorMessage(503));
                         resp.flush();
                         resp.close();
+                        s.close();
                     } catch (IOException e2) {
                         e2.printStackTrace();
                     }
