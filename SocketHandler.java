@@ -143,6 +143,7 @@ public class SocketHandler implements Runnable {
             resp.write(fileBytes);
             resp.flush();
             resp.close();
+            s.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
