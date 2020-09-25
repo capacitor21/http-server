@@ -143,6 +143,7 @@ public class SocketHandler implements Runnable {
             resp.write(fileBytes);
             resp.flush();
             resp.close();
+            req.close();
             s.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -199,9 +200,9 @@ public class SocketHandler implements Runnable {
         try {
             resp.write(response.getBytes());
             resp.flush();
-            resp.close();
-            req.close();
-            s.close();
+            resp.close(); //Close output stream
+            req.close(); //Close input stream
+            s.close(); //Close socket
         } catch (IOException e) {
             e.printStackTrace();
         }
