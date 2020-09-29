@@ -33,11 +33,11 @@ public class PartialHTTP1Server {
                         resp.flush();
                         resp.close();
                         s.close();
-                    } catch (IOException e2) {
+                    } catch (IOException e2) { //when sending 503 error fails
                         e2.printStackTrace();
                     }
                 }
-            } catch(IOException e) {
+            } catch(IOException e) { //when connection fails
                 e.printStackTrace();
             }
         }
