@@ -39,6 +39,11 @@ public class SocketHandler implements Runnable {
      * @param request The request string
      */
     public void parseRequest(String request) {
+        if (request == null || request.trim().isEmpty()) {
+            write(Response.getErrorMessage(400));
+            closeStreams();
+            return;
+        }
         String[] firstLine = request.split(" ");
 
         if (firstLine.length == 0) {
