@@ -19,7 +19,7 @@ public class PartialHTTP1Server {
             e.printStackTrace();
             //Do something
         }
-        ExecutorService tpool = new ThreadPoolExecutor(5,50,1000,TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()); //thread pool object
+        ExecutorService tpool = new ThreadPoolExecutor(5,50,1000,TimeUnit.MILLISECONDS, new SynchronousQueue<>()); //thread pool object
         while(true) {
             try {
                 Socket s = serv.accept();
