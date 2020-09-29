@@ -14,7 +14,7 @@ public class PartialHTTP1Server {
         port = Integer.parseInt(args[0]); //Takes port number from input
 
         try {
-            serv = new ServerSocket(port); 
+            serv = new ServerSocket(port); //Creates server
         } catch(IOException e) {
             e.printStackTrace();
             //Do something
@@ -22,12 +22,12 @@ public class PartialHTTP1Server {
         ExecutorService tpool = new ThreadPoolExecutor(5,50,1000,TimeUnit.MILLISECONDS, new SynchronousQueue<>()); //thread pool object
         while(true) {
             try {
-                Socket s = serv.accept();
+                Socket s = serv.accept(); //connects with a client
                 try{
-                    SocketHandler handler = new SocketHandler(s);
-                    tpool.execute(handler);
-                } catch (RejectedExecutionException e){
-                     try{
+                    SocketHandler handler = new SocketHandler(s); //create thread for the client
+                    tpool.execute(handler); //execute thread, when thread is over, tpool will autimatically remove it
+                } catch (RejectedExecutionException e){ //when threadpool reaches maximum of 50 while a new client is trying to make a connection
+                     try{ //sends a 503 error
                         BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
                         resp.write(Response.getErrorMessage(503));
                         resp.flush();
