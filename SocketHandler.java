@@ -30,7 +30,7 @@ public class SocketHandler implements Runnable {
         } catch (SocketTimeoutException e) {
             write(Response.getErrorMessage(408)); //Catch timeout exception after 5 seconds and send 408 timeout error response
         } catch (IOException e) {
-            e.printStackTrace();
+            closeStreams();
         }
     }
 
@@ -142,11 +142,12 @@ public class SocketHandler implements Runnable {
             resp.write(headers.getBytes());
             resp.write(fileBytes);
             resp.flush();
-            resp.close();
-            req.close();
-            s.close();
+            Thread.sleep(250);
+            closeStreams();
         } catch (IOException e) {
-            e.printStackTrace();
+            closeStreams();
+        } catch (InterruptedException e) {
+            closeStreams();
         }
 
         return;
@@ -200,12 +201,25 @@ public class SocketHandler implements Runnable {
         try {
             resp.write(response.getBytes());
             resp.flush();
+            Thread.sleep(250);
+            closeStreams();
+        } catch (IOException e) {
+            closeStreams();
+        } catch (InterruptedException e) {
+            closeStreams();
+        }
+    }
+
+    public void closeStreams() {
+        try {
             resp.close(); //Close output stream
             req.close(); //Close input stream
             s.close(); //Close socket
         } catch (IOException e) {
-            e.printStackTrace();
+
         }
+
+        return;
     }
 }
 

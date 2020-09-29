@@ -25,6 +25,7 @@ class Client {
 
             sentence = inFromUser.readLine();
             outToServer.writeBytes(sentence + '\n');
+            outToServer.flush();
 
             String line;
 
