@@ -37,6 +37,9 @@ public class PartialHTTP1Server {
                     } catch (IOException e2) {
                         s.close();
                     }
+                    catch (InterruptedException) {
+                        s.close();
+                    }
                 }
             } catch(IOException e) {
             }
