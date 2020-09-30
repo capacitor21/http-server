@@ -34,12 +34,12 @@ public class PartialHTTP1Server {
                         Thread.sleep(250);
                         resp.close();
                         s.close();
-                    } catch (IOException e2) { //when sending 503 error fails
+                    } catch (IOException e2) { //when sending 503 error fails, it'll throw an IOExeception
                         e2.printStackTrace(); //print the IOexecption error
-                        s.close();
+                        s.close(); //close the server
                     }
                 }
-            } catch(IOException e) { //when connection fails
+            } catch(IOException e) { //when connection fails, it'll throw an IOExeception
                 e.printStackTrace(); //print the IOexecption error
             }
         }
