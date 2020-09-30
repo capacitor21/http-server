@@ -35,12 +35,12 @@ public class PartialHTTP1Server {
                         resp.close();
                         s.close();
                     } catch (IOException e2) {
-                        e2.printStackTrace();
+                        //e2.printStackTrace();
                         s.close();
                     }
                 }
             } catch(IOException e) {
-                e.printStackTrace(); 
+                //e.printStackTrace(); 
             }
         }
     }
