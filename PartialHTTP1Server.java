@@ -1,8 +1,11 @@
+/**
+* @author Michael DeDreu
+* @author Christopher DeAngelis
+*/
+
 import java.io.*;
 import java.net.*;
-import java.util.*;
-//import for thread pool:
-import java.util.concurrent.*;
+import java.util.concurrent.*; //import for thread pool:
 
 
 public class PartialHTTP1Server {
@@ -16,7 +19,6 @@ public class PartialHTTP1Server {
         try {
             serv = new ServerSocket(port); //Creates server
         } catch(IOException e) {
-            e.printStackTrace();
             //Do something
         }
         ExecutorService tpool = new ThreadPoolExecutor(5,50,1000,TimeUnit.MILLISECONDS, new SynchronousQueue<>()); //thread pool object
@@ -42,6 +44,7 @@ public class PartialHTTP1Server {
                     }
                 }
             } catch(IOException e) {
+
             }
         }
     }

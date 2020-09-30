@@ -1,3 +1,9 @@
+/**
+ * @author Michael DeDreu
+ * @author Christopher DeAngelis
+ */
+
+
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -39,13 +45,15 @@ public class SocketHandler implements Runnable {
      * @param request The request string
      */
     public void parseRequest(String request) {
+
+        //If request is just empty lines send bad request
         if (request == null || request.trim().isEmpty()) {
             write(Response.getErrorMessage(400));
             closeStreams();
             return;
         }
         String[] firstLine = request.split(" ");
-
+        
         if (firstLine.length == 0) {
             write(Response.getErrorMessage(400)); // Bad request NULL request
             return;
@@ -72,7 +80,7 @@ public class SocketHandler implements Runnable {
         try {
             sourceFile.getCanonicalPath();
         } catch (Exception e) {
-            write(Response.getErrorMessage(400));
+            write(Response.getErrorMessage(400)); //Send 400 Bad request when not valid
             return;
         }
 
@@ -115,10 +123,10 @@ public class SocketHandler implements Runnable {
      */
     public void get(File sourceFile) {
         if (!sourceFile.exists()) {
-            write(Response.getErrorMessage(404));
+            write(Response.getErrorMessage(404)); //If file does not exist send 404 Not found
             return;
         } else if (!sourceFile.canRead()) {
-            write(Response.getErrorMessage(403));
+            write(Response.getErrorMessage(403)); //If file unreadable 403 forbidden
             return;
         }
         
@@ -136,17 +144,17 @@ public class SocketHandler implements Runnable {
             }
         }
         
-        Response r = new Response(sourceFile);
+        Response r = new Response(sourceFile); //Create new response object with source file
 
         String headers;
         byte[] fileBytes;
         try {
-            fileBytes = Files.readAllBytes(sourceFile.toPath());
-            headers = r.getResponseHeaders(fileBytes.length) + "\r\n";
+            fileBytes = Files.readAllBytes(sourceFile.toPath()); //Reads file to byte array
+            headers = r.getResponseHeaders(fileBytes.length) + "\r\n"; //Creates headers 
 
-            resp.write(headers.getBytes());
+            resp.write(headers.getBytes()); 
             resp.write(fileBytes);
-            resp.flush();
+            resp.flush(); //Flushes the headers and bytes to the output stream
             Thread.sleep(250);
             closeStreams();
         } catch (IOException e) {
@@ -164,7 +172,7 @@ public class SocketHandler implements Runnable {
      * @param request The request string
      */
     public void post(File sourceFile) {
-
+        return;
     }
 
 
@@ -175,13 +183,15 @@ public class SocketHandler implements Runnable {
     public void head(File sourceFile) {
 
         if (!sourceFile.exists()) {
-            write(Response.getErrorMessage(404));
+            write(Response.getErrorMessage(404)); //If file not found send 404 not found
             return;
         } else if (!sourceFile.canRead()) {
-            write(Response.getErrorMessage(403));
+            write(Response.getErrorMessage(403)); //If file unreadable found send 403 Forbidden
             return;
         }
 
+
+        //Gets response headers and writes them to output stream
         Response r = new Response(sourceFile);
 
         String headers;
@@ -191,7 +201,7 @@ public class SocketHandler implements Runnable {
             headers = r.getResponseHeaders(fileBytes.length);
             write(headers);
         } catch (IOException e) {
-            e.printStackTrace();
+            write(Response.getErrorMessage(500));
         }
 
         return;
@@ -215,6 +225,9 @@ public class SocketHandler implements Runnable {
         }
     }
 
+    /**
+     * Closes all streams
+     */
     public void closeStreams() {
         try {
             resp.close(); //Close output stream
@@ -345,9 +358,9 @@ class Response {
      */
     public static String convertDateFormat(long time) {
         Date date = new Date(time);
-        SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String httpDate = formatter.format(date);
+        SimpleDateFormat httpFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        httpFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String httpDate = httpFormatter.format(date);
 
         return httpDate;
     }
@@ -358,13 +371,13 @@ class Response {
      * @return date in long format or 0 if cannot be parsed
      */
     public static long convertToLong(String date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        SimpleDateFormat httpFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+        httpFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         Date dateObj;
         long inLong;
         try {
-            dateObj = formatter.parse(date);
+            dateObj = httpFormatter.parse(date);
             inLong = dateObj.getTime();
         } catch (ParseException e) {
             inLong = 0;

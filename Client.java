@@ -24,7 +24,7 @@ class Client {
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
             sentence = inFromUser.readLine();
-            outToServer.writeBytes(sentence + '\n');
+            outToServer.writeBytes(sentence + "\r\n\r\n");
             outToServer.flush();
 
             String line;
