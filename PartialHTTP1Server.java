@@ -26,21 +26,21 @@ public class PartialHTTP1Server {
                 try{
                     SocketHandler handler = new SocketHandler(s); //create thread for the client
                     tpool.execute(handler); //execute thread, when thread is over, tpool will autimatically remove it
-                } catch (RejectedExecutionException e){ //when threadpool reaches maximum of 50 while a new client is trying to make a connection
-                     try{ //sends a 503 error
+                } catch (RejectedExecutionException e){ 
+                     try{ //when threadpool reaches maximum of 50 while a new client is trying to make a connection, sends a 503 error
                         BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
                         resp.write(Response.getErrorMessage(503));
                         resp.flush();
                         Thread.sleep(250);
                         resp.close();
                         s.close();
-                    } catch (IOException e2) { //when sending 503 error fails, it'll throw an IOExeception
-                        e2.printStackTrace(); //print the IOexecption error
-                        s.close(); //close the server
+                    } catch (IOException e2) {
+                        e2.printStackTrace();
+                        s.close();
                     }
                 }
-            } catch(IOException e) { //when connection fails, it'll throw an IOExeception
-                e.printStackTrace(); //print the IOexecption error
+            } catch(IOException e) {
+                e.printStackTrace(); 
             }
         }
     }
