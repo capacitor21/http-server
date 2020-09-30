@@ -31,14 +31,16 @@ public class PartialHTTP1Server {
                         BufferedWriter resp = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
                         resp.write(Response.getErrorMessage(503));
                         resp.flush();
+                        Thread.sleep(250);
                         resp.close();
                         s.close();
                     } catch (IOException e2) { //when sending 503 error fails
-                        e2.printStackTrace();
+                        e2.printStackTrace(); //print the IOexecption error
+                        s.close();
                     }
                 }
             } catch(IOException e) { //when connection fails
-                e.printStackTrace();
+                e.printStackTrace(); //print the IOexecption error
             }
         }
     }
