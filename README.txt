@@ -1,2 +1,2 @@
-Michael DeDreu:mcd216
-Christopher DeAngelis:cjd237
+mcd216:Michael DeDreu
+cjd237:Christopher DeAngelis
